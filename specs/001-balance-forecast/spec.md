@@ -8,6 +8,16 @@
 
 **Input**: User description: "SB Regression pipeline: predict future account balances, using the assigned EDA tables transactions, account_balance_history and economics (recommendation accepted when /speckit-specify was run without a new description)."
 
+## Clarifications
+
+### Session 2026-10-23
+
+- Q: What should "typical dollar error" in the success criteria mean when forecasts are compared with real balances? → A: Mean absolute error in dollars (average size of the miss).
+- Q: Should this regression feature also deliver an interactive stakeholder dashboard, or only the notebooks and the report chapter? → A: Out of scope here; a later separate feature covers SB and SC together.
+- Q: Should each account contribute one learning example per month-end, or only one example from a single cut-off date? → A: One example per account per month-end; periods split by cut-off date.
+- Q: How should Dormant and Closed accounts be treated, given that their status is known only as of today and not at each cut-off date? → A: Keep all accounts; report error by current status; never filter on it.
+- Q: By how much must the forecast cut the baseline's mean absolute error before the hypothesis counts as confirmed? → A: At least 10% lower MAE confirms; a 0–10% gain is partial; no gain rejects.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Forecast each account's future month-end balance (Priority: P1)
@@ -23,7 +33,7 @@ forecast that beats the bank's current assumption, no downstream use has value.
 
 **Independent Test**: on months the forecast never saw, compare the forecast with the real
 month-end balances and with the "balance stays the same" assumption; the forecast is useful
-only if its typical dollar error is smaller.
+only if its mean absolute error in dollars is smaller.
 
 **Acceptance Scenarios**:
 
@@ -31,11 +41,11 @@ only if its typical dollar error is smaller.
    **Then** it uses only information that was available at that cut-off (no later balances,
    transactions or economic figures).
 2. **Given** the held-out final months, **When** forecasts are compared with real balances,
-   **Then** the typical dollar error and the error relative to the "balance stays the same"
-   assumption are both reported.
+   **Then** the mean absolute error in dollars and its change relative to the "balance stays
+   the same" assumption are both reported.
 3. **Given** the forecast results, **When** the stakeholder reads the outcome section,
    **Then** it states one of "Hypothesis Confirmed", "Hypothesis Partially Confirmed" or
-   "Hypothesis Rejected", against a success threshold fixed before the results were read.
+   "Hypothesis Rejected" by the rule in SC-001, fixed before the results were read.
 
 ---
 
@@ -77,7 +87,7 @@ modelling and compare each group's error with the overall error.
 **Acceptance Scenarios**:
 
 1. **Given** held-out forecasts, **When** errors are grouped by protected attribute,
-   **Then** each group's typical error is reported next to the overall error.
+   **Then** each group's mean absolute error is reported next to the overall one.
 2. **Given** the final forecast, **When** the stakeholder asks why a balance is forecast to
    fall, **Then** the main drivers are named in business terms.
 
@@ -87,8 +97,9 @@ modelling and compare each group's error with the overall error.
 
 - Accounts whose open date falls after the first balance month-end: balances before opening
   must not be treated as real history.
-- Closed or dormant accounts: their future balance is not a planning question; they are
-  excluded from forecasting or reported separately.
+- Dormant or Closed accounts: their status is a current-day value with no change date, so
+  filtering on it would use future knowledge. They stay in every period, and their error is
+  reported separately by status.
 - Transaction history starts one year after balance history: early months have balances but
   no transactions, which must not be read as "no spending".
 - Economic figures are dated at the start of each month while balances are month-end: the
@@ -109,14 +120,19 @@ modelling and compare each group's error with the overall error.
   with the scope justified by EDA results (provisional working assumption: personal
   behaviour-driven accounts, excluding Term Deposit and Business, see Assumptions).
 - **FR-003**: Every forecast MUST use only information available at its cut-off month-end.
-- **FR-004**: Training, validation and test periods MUST be consecutive in time, with the
-  test period being the most recent months and used once, for the final result.
+- **FR-004**: Each account MUST contribute one forecast example per month-end cut-off whose
+  target month-end is observed. Examples are assigned to training, validation and test by
+  cut-off date; the three periods MUST be consecutive in time, with test the most recent
+  and used once, for the final result. No example's target may fall inside a later period's
+  cut-offs used for evaluation.
 - **FR-005**: The pipeline MUST include a baseline equal to "the balance stays the same as at
   the cut-off", and report every model against it.
 - **FR-006**: Each experiment MUST state one hypothesis, the evidence it rests on, and a
   success rule fixed before results are read.
-- **FR-007**: Forecast quality MUST be reported in dollars, overall and by balance segment
-  and account type.
+- **FR-007**: Forecast quality MUST be reported as mean absolute error (MAE) in dollars,
+  overall and by balance segment, account type and current account status.
+- **FR-015**: Fields known only as of today (such as current account status or current
+  balance) MUST NOT be used to select examples or as forecast inputs.
 - **FR-008**: The pipeline MUST report forecast errors by protected group (age band, gender,
   state, vulnerable-customer flag) recovered after modelling; protected attributes MUST NOT
   be forecast inputs.
@@ -140,6 +156,8 @@ modelling and compare each group's error with the overall error.
   being forecast.
 - **Monthly balance snapshot**: an account's balance and change at a month-end; the target
   comes from a future snapshot.
+- **Forecast example**: one account at one cut-off month-end, holding what was known at the
+  cut-off and the balance at the target month-end; identified by account and cut-off date.
 - **Transaction**: an account's dated money movement with type, channel and merchant
   details; summarised per account and month as behaviour signals.
 - **Economic indicator**: monthly macro figures (inflation, interest, unemployment,
@@ -151,10 +169,12 @@ modelling and compare each group's error with the overall error.
 
 ### Measurable Outcomes
 
-- **SC-001**: On the held-out test months, the forecast's typical dollar error is at least
-  10% lower than that of the "balance stays the same" baseline.
-- **SC-002**: No protected group's typical error exceeds 1.25 times the overall typical
-  error, or every group that does is named with a mitigation.
+- **SC-001**: On the held-out test months, the forecast's mean absolute error in dollars is
+  compared with that of the "balance stays the same" baseline: at least 10% lower is
+  "Hypothesis Confirmed"; lower by more than 0% but less than 10% is "Hypothesis Partially
+  Confirmed"; equal or higher is "Hypothesis Rejected".
+- **SC-002**: No protected group's mean absolute error exceeds 1.25 times the overall mean
+  absolute error, or every group that does is named with a mitigation.
 - **SC-003**: A stakeholder can re-run every SB notebook from the documented instructions,
   with no undocumented step, and reproduce the reported numbers.
 - **SC-004**: Every number quoted in the notebooks' narrative and the report matches an
@@ -170,8 +190,8 @@ modelling and compare each group's error with the overall error.
   excluding Term Deposit and Business. The stakeholder requires each to be confirmed or
   revised from explicit EDA results (tables, visuals, hypothesis tests) before it shapes the
   hypothesis or the conclusion.
-- The success threshold of SC-001 (10% lower error) and the fairness ratio of SC-002 (1.25)
-  are proposed defaults; they are fixed before any result is read.
+- The SC-001 rule was agreed in clarification (2026-10-23). The fairness ratio of SC-002
+  (1.25) is a proposed default; both are fixed before any model result is read.
 - Balance history covers 48 consecutive month-ends (January 2022 to December 2025) for
   every account; transactions cover January 2023 to December 2025; economics are monthly
   from January 2020.
@@ -182,3 +202,5 @@ modelling and compare each group's error with the overall error.
 - The stakeholder runs the notebooks in the course's hosted notebook environment with data
   in the stakeholder's storage folder.
 - Anomaly Detection (SC) is a separate feature specification.
+- Out of scope: an interactive stakeholder dashboard. Deliverables are the SB notebooks and
+  the SB report chapter; a later separate feature may present SB and SC results together.
