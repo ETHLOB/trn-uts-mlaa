@@ -55,3 +55,6 @@ wheels/
 
 # OS
 .DS_Store
+
+# Spec Kit extension catalog cache
+.specify/extensions/.cache/

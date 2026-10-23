@@ -1,0 +1,83 @@
+# Git Branching Workflow Extension Configuration
+# Copied to .specify/extensions/git/git-config.yml on install
+
+# Branch numbering strategy: "sequential" (001, 002, ...) or "timestamp" (YYYYMMDD-HHMMSS)
+branch_numbering: sequential
+
+# Project convention (per archetype): branches are "<archetype>/<number>-<slug>",
+# archetype in {sb-regression, sc-anomaly} (SA/SD belong to other teams).
+# The template has no archetype token, so the before_specify hook is run with
+# GIT_BRANCH_NAME=<archetype>/<NNN>-<slug>, NNN matching the specs/ directory.
+# Optional branch name template. Leave empty for the default "{number}-{slug}".
+# Supported tokens: {author}, {app}, {number}, {slug}
+# {slug} must not appear before {number}; final path segment must start with {number}-.
+# Example for monorepos: "{author}/{app}/{number}-{slug}"
+branch_template: ""
+
+# Optional shorthand namespace. Leave empty to use branch_template/default behavior.
+# Example: "features/{app}" expands to "features/{app}/{number}-{slug}"
+branch_prefix: ""
+
+# Commit message used by `git commit` during repository initialization
+init_commit_message: "[CHORE] spec-kit: Initial commit"
+
+# Commit message style used by auto-commit hooks (speckit.git.commit):
+# "fixed"        - default; use the configured/static messages below.
+# "conventional" - ask the agent to inspect the diff and generate a
+#                  Conventional Commit message (e.g. "feat: add OAuth spec")
+#                  instead of using the messages configured below.
+commit_style: fixed
+
+# Auto-commit before/after core commands.
+# Set "default" to enable for all commands, then override per-command.
+# Each key can be true/false. Message is customizable per-command.
+auto_commit:
+  default: false
+  before_clarify:
+    enabled: false
+    message: "[CHORE] spec-kit: Save progress before clarification"
+  before_plan:
+    enabled: false
+    message: "[CHORE] spec-kit: Save progress before planning"
+  before_tasks:
+    enabled: false
+    message: "[CHORE] spec-kit: Save progress before task generation"
+  before_implement:
+    enabled: false
+    message: "[CHORE] spec-kit: Save progress before implementation"
+  before_checklist:
+    enabled: false
+    message: "[CHORE] spec-kit: Save progress before checklist"
+  before_analyze:
+    enabled: false
+    message: "[CHORE] spec-kit: Save progress before analysis"
+  before_taskstoissues:
+    enabled: false
+    message: "[CHORE] spec-kit: Save progress before issue sync"
+  after_constitution:
+    enabled: false
+    message: "[CHORE] spec-kit: Add project constitution"
+  after_specify:
+    enabled: false
+    message: "[CHORE] spec-kit: Add specification"
+  after_clarify:
+    enabled: false
+    message: "[CHORE] spec-kit: Clarify specification"
+  after_plan:
+    enabled: false
+    message: "[CHORE] spec-kit: Add implementation plan"
+  after_tasks:
+    enabled: false
+    message: "[CHORE] spec-kit: Add tasks"
+  after_implement:
+    enabled: false
+    message: "[CHORE] spec-kit: Implementation progress"
+  after_checklist:
+    enabled: false
+    message: "[CHORE] spec-kit: Add checklist"
+  after_analyze:
+    enabled: false
+    message: "[CHORE] spec-kit: Add analysis report"
+  after_taskstoissues:
+    enabled: false
+    message: "[CHORE] spec-kit: Sync tasks to issues"
