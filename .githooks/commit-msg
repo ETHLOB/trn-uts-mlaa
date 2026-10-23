@@ -1,0 +1,13 @@
+#!/bin/sh
+# Enforce the commit type prefix on the first line of the message.
+#   [FEATURE] new feature or functionality
+#   [UPDATE]  patch or change to an existing feature, bug fixes included
+#   [CHORE]   tooling, styles, docs, small changes
+first=$(grep -v '^#' "$1" | head -n 1)
+case "$first" in
+  "[FEATURE] "?*|"[UPDATE] "?*|"[CHORE] "?*) exit 0 ;;
+  Merge\ *|Revert\ *|fixup\!\ *|squash\!\ *) exit 0 ;;
+esac
+echo "commit-msg: first line must start with [FEATURE], [UPDATE] or [CHORE] followed by a space and a summary." >&2
+echo "  got: $first" >&2
+exit 1

@@ -1,0 +1,57 @@
+# Secrets and tool configs
+.env
+.env.*
+*.pem
+*.key
+.mcp.json
+.claude/
+CLAUDE.md
+
+# Internal documents (never in the repository, never referenced by the README)
+.blueprint/
+BUSINESS.md
+STORYTELLING.md
+EXPLAINABILITY.md
+EXPLAINABILITY.html
+
+# Evidence (screenshots show identifiers)
+screenshots/
+
+# Course material: keep at most the original
+doc/*_clean.md
+doc/*_clean.html
+doc/*.doc
+doc/*.docx
+
+# Report assets stay local; re-include only README diagrams
+doc/figures/*
+report/
+
+# Data and saved models
+data/
+models/
+*.csv
+*.parquet
+*.zip
+*.joblib
+*.duckdb
+*.duckdb.wal
+
+# Local notebook verification output
+.nbrun/
+
+# Binaries (Colab tunnel attempt)
+/code
+
+# Python and tooling
+.venv/
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.ipynb_checkpoints/
+
+# OS
+.DS_Store

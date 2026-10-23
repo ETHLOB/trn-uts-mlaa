@@ -1,0 +1,28 @@
+[project]
+name = "assignment-3"
+version = "0.1.0"
+description = "UTS 36106 AT3: regression and anomaly detection pipelines on a digital-bank warehouse (Colab notebooks)"
+readme = "README.md"
+authors = [
+    { name = "Andres Ethorimn" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "altair>=6.3.0",
+    "jupyterlab>=4.6.4",
+    "matplotlib>=3.11.2",
+    "nbconvert[webpdf]>=7.17.2",
+    "pandas>=3.1.0",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
+    "vl-convert-python>=1.9.0.post1",
+    "vscode-colab>=0.3.1",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "ruff>=0.17.2",
+]
