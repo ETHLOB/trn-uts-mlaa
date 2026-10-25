@@ -58,3 +58,10 @@ wheels/
 
 # Spec Kit extension catalog cache
 .specify/extensions/.cache/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.tmp
+Thumbs.db
