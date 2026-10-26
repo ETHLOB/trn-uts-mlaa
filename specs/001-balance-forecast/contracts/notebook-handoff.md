@@ -16,10 +16,12 @@ local landmine registry).
 
 Identical in every SB notebook's constants cell; any change is made in all of them.
 
-| Constant | Provisional value | Source |
+| Constant | Value | Source |
 |---|---|---|
 | `HORIZON` | 3 | research R1 |
-| `IN_SCOPE_TYPES` | Savings, Transaction, Offset, Youth | research R4 |
+| `IN_SCOPE_TYPES` | all six types | research R4 |
+| `SEGMENT_KEYS` | `income_band`, `has_loan`, `balance_band` | research R12 |
+| `MIN_SEGMENT_ACCOUNTS` | 30 | research R12 |
 | `LOOKBACK` | 3 month-ends | research R3 |
 | `N_TEST_CUTOFFS`, `N_VAL_CUTOFFS` | 6, 6 | research R3 |
 | `SEED` | 42 | constitution V |
@@ -28,13 +30,14 @@ Identical in every SB notebook's constants cell; any change is made in all of th
 
 | Column | Rule |
 |---|---|
-| `account_id` | first column; key, excluded from `features_list` |
+| `segment_id` | first column; key, excluded from `features_list` |
 | `cutoff_date` | second column, ISO `YYYY-MM-DD`; key, excluded from `features_list` |
-| `balance_at_cutoff` | always present (baseline forecast) |
+| `total_at_cutoff` | always present (baseline forecast) |
 | feature columns | as selected in Preparation A.z; numeric after section E transformations |
 
-Forbidden in X: any target or future column, `account_status`, `current_balance`,
-`customer_id`, `age`, `gender`, `state`, `vulnerable_customer_flag`.
+Forbidden in X: any target or future column, `account_id`, `customer_id`, `account_status`,
+`current_balance`, `age`, `gender`, `vulnerable_customer_flag`, `country_of_birth`,
+`citizenship_status`.
 
 Transformations learned from data (scaling, encodings) are fitted on `X_train` rows only.
 
@@ -42,18 +45,18 @@ Transformations learned from data (scaling, encodings) are fitted on `X_train` r
 
 | Column | Rule |
 |---|---|
-| `account_id`, `cutoff_date` | same values and same row order as the matching `X_*.csv` |
-| `target_change` | `balance(cutoff_date + HORIZON) - balance_at_cutoff`, dollars |
+| `segment_id`, `cutoff_date` | same values and same row order as the matching `X_*.csv` |
+| `target_change` | total at `cutoff_date + HORIZON` of the segment's cut-off accounts minus `total_at_cutoff`, dollars |
 
 Consumers squeeze `target_change` after checking key alignment.
 
 ## Ordering and alignment
 
-- Rows in every X and y file are sorted by `cutoff_date`, then `account_id`.
+- Rows in every X and y file are sorted by `cutoff_date`, then `segment_id`.
 - Baseline rebuilds the example keys with the same rule as Preparation and asserts that its
   keys equal the X keys row by row before saving y.
-- Every consumer asserts `X[["account_id","cutoff_date"]]` equals
-  `y[["account_id","cutoff_date"]]` before fitting or scoring.
+- Every consumer asserts `X[["segment_id","cutoff_date"]]` equals
+  `y[["segment_id","cutoff_date"]]` before fitting or scoring.
 
 ## Outcome variables (final notebook)
 

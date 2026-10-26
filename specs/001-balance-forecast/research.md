@@ -55,16 +55,16 @@ Facts measured before planning (2026-10-23, `data/raw/`):
 - **Alternatives:** random split (rejected: leaks the future); single cut-off (rejected in
   clarification Q3); no embargo (rejected: overlapping targets).
 
-## R4. Accounts in scope and current-day fields (provisional scope)
+## R4. Accounts in scope and current-day fields (decided 2026-10-26)
 
-- **Decision:** `IN_SCOPE_TYPES = {Savings, Transaction, Offset, Youth}` (provisional, R1
-  style constant). Account type is fixed at opening, so it may select examples. Current
-  status and current balance are never used for selection or inputs (FR-015); status is used
-  only to group errors. Months before an account's open date are not history: a cut-off is
-  used only when the account was open for the whole look-back window.
-- **Rationale:** spec Q4 and FR-015 (no future knowledge); edge case on late openings
-  (22.5% of accounts).
-- **Alternatives:** all types (Term Deposits inflate accuracy); filter on status (leaks).
+- **Decision:** all six account types (`IN_SCOPE_TYPES` = Savings, Transaction, Term Deposit,
+  Offset, Business, Youth). Current status and current balance are never used for selection or
+  inputs (FR-015). Months before an account's open date are not history: an account enters a
+  segment at a cut-off only when it was open for the whole look-back window.
+- **Rationale:** types move alike (SB-2 B.3: epsilon squared 0.000004), so excluding any has no
+  behavioural basis; spec Q4 and FR-015 (no future knowledge); 15.0% of month-ends predate the
+  open date (SB-2 B.1).
+- **Alternatives:** exclude Term Deposit and Business (rejected: no evidence they differ).
 
 ## R5. Economic alignment
 
@@ -132,6 +132,24 @@ Facts measured before planning (2026-10-23, `data/raw/`):
 - **Rationale:** brief ("wrap the solution pipeline in a single clean notebook"); skill
   convention for added experiments.
 - **Alternatives:** all experiments inside `SB-c-regression` (rejected: not clean).
+
+## R12. Segments (decided 2026-10-26)
+
+- **Decision:** forecast the total balance per segment. Provisional segment keys, each kept only
+  with EDA evidence: `income_band` (average growth rises from about $100 Low to $1510 Affluent,
+  SB-4 B.2), active loan at the cut-off (growth $480 against $750, SB-4 B.3) and `balance_band` at
+  the cut-off (the spread and the drop share depend on the balance, SB-2 B.1 and B.6): at most
+  4 x 2 x 5 = 40 segments. Account type, credit score and hardship are not keys (no difference,
+  SB-2 B.3, SB-4 B.2). A segment's target is the total, `HORIZON` months later, of the accounts in
+  it at the cut-off (a cohort), so accounts moving between bands are not counted twice. Segments
+  with fewer than `MIN_SEGMENT_ACCOUNTS` accounts at a cut-off are merged with the nearest balance
+  band; the Preparation notebook prints the counts and the merges.
+- **Rationale:** account-level changes are close to independent month to month and no table
+  signals them (SB-1, SB-2 B.2, SB-4); averaging within segments keeps the group-level signals
+  (income, loans, economy) and cancels individual noise (an account's 3-month change varies by
+  about $8550; the bank-wide monthly mean moves within $181 to $293, SB-3).
+- **Alternatives:** one bank-wide series (rejected: 47 monthly points are too few to learn and
+  test on); account-level forecast (rejected at the gate: no signal).
 
 ## R11. Verification
 

@@ -50,37 +50,35 @@ uses are listed; the CSVs carry more than `doc/36106-26SP-AT3.sql`.
 
 ## Derived entity: Forecast example
 
-One row per in-scope account per cut-off month-end.
+One row per segment per cut-off month-end (research R12).
 
 | Field | Type | Definition |
 |---|---|---|
-| `account_id` | int | key part; not an input |
+| `segment_id` | str | key part, built from the segment keys; not an input |
 | `cutoff_date` | date (month-end) | key part; not an input |
 | `period` | `train` / `val` / `test` | from `cutoff_date` (research R3), embargo applied |
+| `accounts` | int | accounts in the segment at the cut-off |
 | feature columns | numeric / encoded | built only from data dated on or before `cutoff_date` |
-| `balance_at_cutoff` | float | balance at `cutoff_date`; input and baseline forecast |
-| `target_change` | float | `balance(cutoff_date + HORIZON) - balance_at_cutoff`; lives only in `y_*.csv` |
+| `total_at_cutoff` | float | total balance of the segment's accounts at `cutoff_date`; input and baseline forecast |
+| `target_change` | float | total at `cutoff_date + HORIZON` of the same accounts minus `total_at_cutoff`; lives only in `y_*.csv` |
 
 Validation rules:
 
-- `(account_id, cutoff_date)` is unique within and across periods.
+- `(segment_id, cutoff_date)` is unique within and across periods.
 - `cutoff_date + HORIZON <= 2025-12-31` (target observed).
 - Every training target month-end is on or before the first validation cut-off; same for
   validation against test (embargo).
-- No feature is computed from a row dated after `cutoff_date`.
-- Account was open for the whole look-back window at `cutoff_date`.
-- `account_type` in `IN_SCOPE_TYPES`; no filter on `account_status`.
-
-Lifecycle: an example has no state transitions. It is created in Preparation (X side) and
-in Baseline (y side) by the same deterministic rule, then read by the experiment and final
-notebooks (see `contracts/notebook-handoff.md`).
+- No feature is computed from a row dated after `cutoff_date`; a loan counts only if it started
+  on or before `cutoff_date`.
+- An account belongs to one segment per cut-off and was open for the whole look-back window.
+- No filter on `account_status`.
 
 ## Derived entity: Prediction record (in memory, for evaluation)
 
 | Field | Definition |
 |---|---|
-| `account_id`, `cutoff_date`, `period` | from the example |
-| `y_true`, `y_pred` | target change and predicted change |
+| `segment_id`, `cutoff_date`, `period` | from the example |
+| `y_true`, `y_pred` | target change and predicted change of the segment total |
 | `abs_error` | `abs(y_true - y_pred)` in dollars |
 | `direction` | over-forecast (`y_pred > y_true`) or under-forecast |
-| group fields | `account_type`, `balance_band` at cut-off, current `account_status`, protected attributes joined from Customer |
+| group fields | segment keys, and per segment the share of vulnerable customers and mean age joined from Customer |

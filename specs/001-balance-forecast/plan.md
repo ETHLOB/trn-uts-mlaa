@@ -1,4 +1,4 @@
-# Implementation Plan: SB Regression, Account Balance Forecast
+# Implementation Plan: SB Regression, Bank-wide Balance Forecast by Segment
 
 **Branch**: `sb-regression/001-balance-forecast` | **Date**: 2026-10-23 | **Spec**: [spec.md](spec.md)
 
@@ -8,15 +8,15 @@
 
 ## Summary
 
-Forecast each in-scope account's month-end balance `HORIZON` months after a cut-off, and
-show whether it beats the bank's current assumption that the balance stays the same. The
-forecast is built as a change on top of the cut-off balance, from one example per account
-per month-end, split into training, validation and test periods by cut-off date with an
-embargo. Quality is mean absolute error in dollars; the outcome follows the pre-set SC-001
-rule. The work fills the university SB notebook templates (three EDA, Preparation,
-Baseline, final regression), plus one experiment notebook per hypothesis. Horizon, business
-use and account scope are provisional constants that the EDA confirms or revises before any
-hypothesis is written.
+Forecast each customer segment's total balance 3 months after a cut-off, and show whether it
+beats the bank's current assumption that the total stays the same. Revised at the EDA gate
+(2026-10-26): account-level changes showed no signal, while income band, active loans and the
+economy relate to group-level growth, so the unit is the segment (research R12), over all six
+account types. The forecast is a change on top of the cut-off total, one example per segment per
+month-end, split into training, validation and test periods by cut-off date with an embargo.
+Quality is mean absolute error in dollars; the outcome follows the pre-set SC-001 rule. The work
+fills the SB notebook templates plus the complementary EDA notebook and one experiment notebook
+per hypothesis.
 
 ## Technical Context
 
@@ -43,8 +43,8 @@ reload without refitting when inputs are unchanged
 cut-off; protected attributes never inputs; report chapter at most 4,000 words; Colab memory
 (the locked loaders read all raw tables, about 0.8 GB of CSV)
 
-**Scale/Scope**: about 30,800 in-scope accounts by 27 kept cut-offs, about 0.8 million
-examples (exact count printed by Preparation); 7 template notebooks plus one per experiment
+**Scale/Scope**: at most 40 segments by 27 kept cut-offs, about 1000 examples (exact count
+printed by Preparation); 7 template notebooks, 1 complementary EDA notebook, one per experiment
 
 ## Constitution Check
 
