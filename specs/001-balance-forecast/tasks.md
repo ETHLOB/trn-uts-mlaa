@@ -124,10 +124,10 @@ the action it supports, without retraining.
 
 **Goal**: forecast quality checked by protected group, and drivers named in business terms.
 
-**Independent Test**: test-period MAE by protected group next to the overall MAE, checked
-against the SC-002 ratio.
+**Independent Test**: test-period MAE ratio (forecast over persistence) per segment with its
+bootstrap interval, next to the segment's protected-attribute mix, checked against SC-002.
 
-- [ ] T032 [US3] In `SB-c` section C.6, join per segment the share of vulnerable customers and mean age from `customers.csv` after prediction ("fairness audit only; never inputs"), report each segment's relative error next to the overall relative error, flag any segment above 1.25 times (SC-002) with a mitigation, chart; fill `ethical_considerations` (depends on T028)
+- [ ] T032 [US3] In `SB-c` section C.6, join per segment the share of vulnerable customers and mean age from `customers.csv` after prediction ("fairness audit only; never inputs"), report each segment's MAE ratio (forecast over persistence) with a 95% bootstrap interval resampling test cut-offs, next to the overall ratio, flag any segment whose interval lies entirely above 1 or entirely above the overall ratio (SC-002) with a mitigation, chart; fill `ethical_considerations` (depends on T028)
 - [ ] T033 [US3] In `SB-c`, add a sub-cell after C.4 that names the main forecast drivers in business terms (coefficients for a linear model, or permutation importance on validation for a tree model), with a chart (depends on T028)
 - [ ] T034 [P] [US3] Re-read the ethics sections of `SB-1`, `SB-2`, `SB-3`, `SB-a` and `SB-c` and align them with the audit result of T032 (each states a concrete risk and the business action that mitigates it)
 

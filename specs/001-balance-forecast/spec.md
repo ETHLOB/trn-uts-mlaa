@@ -23,6 +23,7 @@
 - Q: Which forecast horizon? → A: 3 months, justified by the horizon trade-off (SB-2 B.2, B.5).
 - Q: Which business use? → A: Bank-wide balance planning by customer segment. Account-level early warning is dropped: no assigned or complementary table signals a coming drop (SB-1 B.2-B.4, SB-2 B.4, SB-4 B.2-B.4), while income band, active loans and the economy relate to average growth (SB-4 B.2-B.3, SB-3).
 - Q: Which accounts? → A: All six account types; they behave alike (SB-2 B.3).
+- Q: Which fairness rule? → A: The proposed 1.25 ratio is dropped: it was borrowed from the four-fifths rule for classification selection rates and has no justification for a regression error, and relative error grows mechanically in small-balance segments (SB-2 B.6). Each segment is judged against "total stays the same" in that same segment, and against the overall gain (uneven-gain check).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -83,13 +84,14 @@ drivers move the forecast, in plain language.
 **Why this priority**: responsible-AI discussion is a brief requirement; it depends on a working
 forecast, so it comes third.
 
-**Independent Test**: compare each segment's relative error with the overall relative error,
-next to the segment's share of vulnerable customers and mean age.
+**Independent Test**: compare each segment's forecast error with the error of "total stays the
+same" in that segment, next to the segment's share of vulnerable customers and mean age.
 
 **Acceptance Scenarios**:
 
 1. **Given** held-out forecasts, **When** errors are grouped by segment, **Then** each segment's
-   relative error is reported next to the overall one and the segment's protected-attribute mix.
+   MAE ratio (forecast over "total stays the same") is reported with its 95% interval, next to the
+   overall ratio and the segment's protected-attribute mix.
 2. **Given** the final forecast, **When** the stakeholder asks why a segment total is forecast to
    change, **Then** the main drivers are named in business terms.
 
@@ -165,8 +167,11 @@ next to the segment's share of vulnerable customers and mean age.
   segment totals is compared with that of "the total stays the same": at least 10% lower is
   "Hypothesis Confirmed"; lower by more than 0% but less than 10% is "Hypothesis Partially
   Confirmed"; equal or higher is "Hypothesis Rejected".
-- **SC-002**: No segment's relative error exceeds 1.25 times the overall relative error, or every
-  segment that does is named with its protected-attribute mix and a mitigation.
+- **SC-002**: For each segment, the MAE ratio is the forecast's MAE over that of "total stays the
+  same", with a 95% bootstrap interval (test cut-offs resampled). A segment fails when its interval
+  lies entirely above 1 (worse off than under the bank's current assumption) or entirely above the
+  overall ratio (it gains clearly less than the bank as a whole). SC-002 holds when no segment
+  fails; every segment that fails is named with its protected-attribute mix and a mitigation.
 - **SC-003**: A stakeholder can re-run every SB notebook from the documented instructions, with no
   undocumented step, and reproduce the reported numbers.
 - **SC-004**: Every number quoted in the notebooks' narrative and the report matches an output the
@@ -178,8 +183,9 @@ next to the segment's share of vulnerable customers and mean age.
 
 - Decided at the EDA gate (2026-10-26): horizon 3 months; bank-wide planning by segment; all six
   account types. Evidence and justification are recorded per decision.
-- The SC-001 rule was agreed in clarification (2026-10-23). The fairness ratio of SC-002 (1.25)
-  is a proposed default; both are fixed before any model result is read.
+- The SC-001 rule was agreed in clarification (2026-10-23) and the SC-002 rule at the EDA gate
+  (2026-10-26); both are fixed before any model result is read. SC-002's references, 1 and the
+  overall ratio, are the status quo and the overall result, so no threshold is borrowed.
 - Balance history covers 48 consecutive month-ends (January 2022 to December 2025) for every
   account; transactions cover January 2023 to December 2025; economics are monthly from January
   2020; 17.0% of loans start after the history ends.

@@ -23,7 +23,7 @@ Identical in every SB notebook's constants cell; any change is made in all of th
 | `SEGMENT_KEYS` | `income_band`, `has_loan`, `balance_band` | research R12 |
 | `MIN_SEGMENT_ACCOUNTS` | 30 | research R12 |
 | `LOOKBACK` | 3 month-ends | research R3 |
-| `N_TEST_CUTOFFS`, `N_VAL_CUTOFFS` | 6, 6 | research R3 |
+| `N_TEST_CUTOFFS`, `N_VAL_CUTOFFS` | 6, 6: cut-offs assigned to each period before the embargo; after it, `HORIZON - 1` are dropped from validation and training (with `HORIZON = 3`: 6 test, 4 validation, 17 training) | research R3 |
 | `SEED` | 42 | constitution V |
 
 ## `X_*.csv` schema

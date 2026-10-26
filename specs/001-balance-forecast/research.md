@@ -39,7 +39,7 @@ Facts measured before planning (2026-10-23, `data/raw/`):
 
 ## R3. Cut-offs, periods and the embargo
 
-- **Decision:** one forecast example per account per month-end cut-off `t` with
+- **Decision:** one forecast example per segment per month-end cut-off `t` (research R12) with
   `t + H <= 2025-12-31`. First cut-off is the first month-end with a full transaction
   look-back window (transactions start 2023-01). Periods by cut-off date, most recent last:
   test = the last 6 cut-offs, validation = the 6 before, training = the rest. Embargo: a
