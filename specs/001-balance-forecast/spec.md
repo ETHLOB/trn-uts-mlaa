@@ -18,6 +18,11 @@
 - Q: How should Dormant and Closed accounts be treated, given that their status is known only as of today and not at each cut-off date? → A: Keep all accounts; report error by current status; never filter on it.
 - Q: By how much must the forecast cut the baseline's mean absolute error before the hypothesis counts as confirmed? → A: At least 10% lower MAE confirms; a 0–10% gain is partial; no gain rejects.
 
+### Session 2026-10-27
+
+- Q: Is "total stays the same" the only reference for the forecast? → A: It stays the reference for SC-001, because it is the bank's current assumption. A second, naive reference is reported next to it: every account grows by the bank-wide average 3-month change learned on training cut-offs ("average drift"). Balances grow on average, so persistence is biased low by construction; beating it can mean only that the model learned average growth. H1 counts as showing segment value only if it also beats average drift.
+- Q: How is the minimum segment size set? → A: By a study on training cut-offs: the smallest size at which the standard error of a segment's per-account 3-month change falls below half the smallest key effect the EDA kept (the loan gap within the High band, about $63, SB-4 B.5).
+
 ### Session 2026-10-26 (EDA gate)
 
 - Q: Which forecast horizon? → A: 3 months, justified by the horizon trade-off (SB-2 B.2, B.5).
@@ -124,7 +129,9 @@ same" in that segment, next to the segment's share of vulnerable customers and m
   consecutive in time, test most recent and used once. No example's target may fall inside a
   later period's cut-offs used for evaluation.
 - **FR-005**: The pipeline MUST include a baseline equal to "the segment total stays the same as at
-  the cut-off", and report every model against it.
+  the cut-off", and report every model against it. It MUST also report an average-drift reference
+  (every account changes by the bank-wide mean 3-month change of the training cut-offs), used to
+  read whether a model adds more than average growth; SC-001 is unchanged.
 - **FR-006**: Each experiment MUST state one hypothesis, the evidence it rests on, and a success
   rule fixed before results are read.
 - **FR-007**: Forecast quality MUST be reported as mean absolute error (MAE) in dollars overall and

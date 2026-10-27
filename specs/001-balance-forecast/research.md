@@ -134,6 +134,21 @@ Facts measured before planning (2026-10-23, `data/raw/`):
   convention for added experiments.
 - **Alternatives:** all experiments inside `SB-c-regression` (rejected: not clean).
 
+## R13. Baselines (decided 2026-10-27)
+
+- **Decision:** two references, both scored on validation in `SB-b` and on test in `SB-c`.
+  Persistence ("the segment total stays the same") is the bank's current assumption and the
+  reference for SC-001. Average drift predicts, for a segment, its accounts at the cut-off times
+  the mean per-account 3-month change of the training examples (fitted on training only).
+- **Rationale:** balances grow on average (about $700 per account per quarter, SB-2 B.2), so
+  persistence errs low by construction and any model that learns the average growth beats it.
+  Average drift isolates that effect: H1's claim that segment keys and recent change forecast
+  better is supported only if H1 also beats average drift. If it does not, the cheaper and more
+  explainable drift rule is the recommendation.
+- **Alternatives:** persistence only (rejected: a "confirmed" result could reflect growth alone);
+  segment-specific drift as the second reference (rejected: it already uses the segment keys, so
+  it is a simple version of H1, not a naive reference).
+
 ## R12. Segments (decided 2026-10-26)
 
 - **Decision:** forecast the total balance per segment. Provisional segment keys, each kept only
@@ -146,9 +161,11 @@ Facts measured before planning (2026-10-23, `data/raw/`):
   information; the overlap leaves a sparse grid that Preparation merges. A segment's target is
   the total, `HORIZON` months later, of the accounts in it at the cut-off (a cohort), so accounts moving between bands are not counted twice. Segments
   smaller than `MIN_SEGMENT_ACCOUNTS` are merged with the nearest balance band of the same income
-  band and loan status. The minimum is set by a study on training cut-offs only (how the noise of
-  a segment's per-account change shrinks with its size), not by a rule of thumb, and the merge map
-  is fixed on training and applied unchanged to every period (decided 2026-10-27).
+  band and loan status. The minimum is set by a study on training cut-offs only: the smallest size
+  at which the standard error of a segment's per-account 3-month change falls below half the
+  smallest key effect the EDA kept (the loan gap within the High band, about $63, SB-4 B.5), not
+  by a rule of thumb. The merge map is fixed on training and applied unchanged to every period
+  (decided 2026-10-27).
 - **Rationale:** account-level changes are close to independent month to month and no table
   signals them (SB-1, SB-2 B.2, SB-4); averaging within segments keeps the group-level signals
   (income, loans, economy) and cancels individual noise (an account's 3-month change varies by
