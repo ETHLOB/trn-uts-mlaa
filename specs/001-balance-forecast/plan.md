@@ -83,13 +83,13 @@ specs/001-balance-forecast/
 
 ```text
 notebook/1_regression/
-├── 36106-26SP-AT3-student_id-SB-1-eda-transactions.ipynb            # EDA, assigned table
-├── 36106-26SP-AT3-student_id-SB-2-eda-account_balance_history.ipynb # EDA, assigned table
-├── 36106-26SP-AT3-student_id-SB-3-eda-economics.ipynb               # EDA, assigned table
-├── 36106-26SP-AT3-student_id-SB-a-Preparation.ipynb                 # writes X_*.csv
-├── 36106-26SP-AT3-student_id-SB-b-Baseline.ipynb                    # writes y_*.csv; persistence
-├── 36106-26SP-AT3-student_id-SB-x<N>-<short-name>.ipynb             # one per hypothesis (new)
-└── 36106-26SP-AT3-student_id-SB-c-regression.ipynb                  # final clean solution
+├── 36106-26SP-AT3-26029165-SB-1-eda-transactions.ipynb            # EDA, assigned table
+├── 36106-26SP-AT3-26029165-SB-2-eda-account_balance_history.ipynb # EDA, assigned table
+├── 36106-26SP-AT3-26029165-SB-3-eda-economics.ipynb               # EDA, assigned table
+├── 36106-26SP-AT3-26029165-SB-a-Preparation.ipynb                 # writes X_*.csv
+├── 36106-26SP-AT3-26029165-SB-b-Baseline.ipynb                    # writes y_*.csv; persistence
+├── 36106-26SP-AT3-26029165-SB-x<N>-<short-name>.ipynb             # one per hypothesis (new)
+└── 36106-26SP-AT3-26029165-SB-c-regression.ipynb                  # final clean solution
 ```
 
 Local-only companions (gitignored): `BUSINESS.md`, `STORYTELLING.md`, `EXPLAINABILITY.md`,

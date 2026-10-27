@@ -40,17 +40,18 @@ Facts measured before planning (2026-10-23, `data/raw/`):
 ## R3. Cut-offs, periods and the embargo
 
 - **Decision:** one forecast example per segment per month-end cut-off `t` (research R12) with
-  `t + H <= 2025-12-31`. First cut-off is the first month-end with a full transaction
-  look-back window (transactions start 2023-01). Periods by cut-off date, most recent last:
+  `t + H <= 2025-12-31`. First cut-off is the first month-end with `LOOKBACK` (3) month-ends of
+  balance history before it, 2022-04-30; transactions are not used (no signal, SB-1), so their
+  later start no longer limits the cut-offs (decided 2026-10-27). Periods by cut-off date, most recent last:
   test = the last 6 cut-offs, validation = the 6 before, training = the rest. Embargo: a
   cut-off `t` stays in its period only if `t + H` is on or before the first cut-off of the
   next period, which drops the last `H - 1` cut-offs of training and of validation. No
   training target month-end then falls after the first validation cut-off, and likewise for
   validation and test.
 - **Rationale:** spec FR-003, FR-004 and Q3; the embargo stops overlapping targets from
-  leaking the next period's outcomes. With `H = 3` and a 3-month transaction look-back:
-  cut-offs 2023-03-31 to 2025-09-30 (31); test 2025-04-30 to 2025-09-30 (6); validation
-  2024-10-31 to 2025-01-31 (4 of 6 kept); training 2023-03-31 to 2024-07-31 (17 of 19 kept). Exact boundaries are
+  leaking the next period's outcomes. With `H = 3` and a 3-month balance look-back:
+  cut-offs 2022-04-30 to 2025-09-30 (42); test 2025-04-30 to 2025-09-30 (6); validation
+  2024-10-31 to 2025-01-31 (4 of 6 kept); training 2022-04-30 to 2024-07-31 (28 of 30 kept). Exact boundaries are
   printed by the Preparation notebook and re-derived if `HORIZON` changes.
 - **Alternatives:** random split (rejected: leaks the future); single cut-off (rejected in
   clarification Q3); no embargo (rejected: overlapping targets).
@@ -127,7 +128,7 @@ Facts measured before planning (2026-10-23, `data/raw/`):
 
 - **Decision:** each experiment (one hypothesis) gets its own notebook copied from the
   regression template without the hidden template comments, named
-  `36106-26SP-AT3-student_id-SB-x<N>-<short-name>.ipynb`. The template's
+  `36106-26SP-AT3-26029165-SB-x<N>-<short-name>.ipynb`. The template's
   `SB-c-regression.ipynb` holds only the final clean solution (brief, FR-010).
 - **Rationale:** brief ("wrap the solution pipeline in a single clean notebook"); skill
   convention for added experiments.
@@ -140,10 +141,14 @@ Facts measured before planning (2026-10-23, `data/raw/`):
   SB-4 B.2), active loan at the cut-off (growth $480 against $750, SB-4 B.3) and `balance_band` at
   the cut-off (the spread and the drop share depend on the balance, SB-2 B.1 and B.6): at most
   4 x 2 x 5 = 40 segments. Account type, credit score and hardship are not keys (no difference,
-  SB-2 B.3, SB-4 B.2). A segment's target is the total, `HORIZON` months later, of the accounts in
-  it at the cut-off (a cohort), so accounts moving between bands are not counted twice. Segments
-  with fewer than `MIN_SEGMENT_ACCOUNTS` accounts at a cut-off are merged with the nearest balance
-  band; the Preparation notebook prints the counts and the merges.
+  SB-2 B.3, SB-4 B.2). Income and balance band overlap (Cramer's V 0.456), but income still orders
+  growth within every balance band and a loan still lowers it (SB-4 B.5), so each key adds its own
+  information; the overlap leaves a sparse grid that Preparation merges. A segment's target is
+  the total, `HORIZON` months later, of the accounts in it at the cut-off (a cohort), so accounts moving between bands are not counted twice. Segments
+  smaller than `MIN_SEGMENT_ACCOUNTS` are merged with the nearest balance band of the same income
+  band and loan status. The minimum is set by a study on training cut-offs only (how the noise of
+  a segment's per-account change shrinks with its size), not by a rule of thumb, and the merge map
+  is fixed on training and applied unchanged to every period (decided 2026-10-27).
 - **Rationale:** account-level changes are close to independent month to month and no table
   signals them (SB-1, SB-2 B.2, SB-4); averaging within segments keeps the group-level signals
   (income, loans, economy) and cancels individual noise (an account's 3-month change varies by
@@ -154,7 +159,7 @@ Facts measured before planning (2026-10-23, `data/raw/`):
 ## R11. Verification
 
 - **Decision:** each notebook carries integrity check cells (row counts per period, unique
-  `(account_id, cutoff_date)` keys, X/y key alignment, no target column in X, no cut-off later
+  `(segment_id, cutoff_date)` keys, X/y key alignment, no target column in X, no cut-off later
   than its target, no protected attribute in `features_list`). Before hand-over each notebook
   runs locally with `nbrun.py` on `data/raw`; numbers re-checked against the Colab run.
 - **Rationale:** constitution II and V; no test framework is needed for notebooks.
