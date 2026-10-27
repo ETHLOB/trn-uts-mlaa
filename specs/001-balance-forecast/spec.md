@@ -21,7 +21,7 @@
 ### Session 2026-10-27
 
 - Q: Is "total stays the same" the only reference for the forecast? → A: It stays the reference for SC-001, because it is the bank's current assumption. A second, naive reference is reported next to it: every account grows by the bank-wide average 3-month change learned on training cut-offs ("average drift"). Balances grow on average, so persistence is biased low by construction; beating it can mean only that the model learned average growth. H1 counts as showing segment value only if it also beats average drift.
-- Q: How is the minimum segment size set? → A: By a study on training cut-offs: the smallest size at which the standard error of a segment's per-account 3-month change falls below half the smallest key effect the EDA kept (the loan gap within the High band, about $63, SB-4 B.5).
+- Q: How are small or uninformative segments handled? → A: A segment stays apart only if its training drift differs from the bank-wide drift by at least 2 standard errors; otherwise it merges into its adjacent balance band. (A size rule, standard error below half the $63 loan gap, was tried first and dropped: it needed 1700 to 200000 accounts per segment, more than any segment holds.)
 
 ### Session 2026-10-26 (EDA gate)
 

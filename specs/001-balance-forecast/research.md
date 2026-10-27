@@ -160,12 +160,13 @@ Facts measured before planning (2026-10-23, `data/raw/`):
   growth within every balance band and a loan still lowers it (SB-4 B.5), so each key adds its own
   information; the overlap leaves a sparse grid that Preparation merges. A segment's target is
   the total, `HORIZON` months later, of the accounts in it at the cut-off (a cohort), so accounts moving between bands are not counted twice. Segments
-  smaller than `MIN_SEGMENT_ACCOUNTS` are merged with the nearest balance band of the same income
-  band and loan status. The minimum is set by a study on training cut-offs only: the smallest size
-  at which the standard error of a segment's per-account 3-month change falls below half the
-  smallest key effect the EDA kept (the loan gap within the High band, about $63, SB-4 B.5), not
-  by a rule of thumb. The merge map is fixed on training and applied unchanged to every period
-  (decided 2026-10-27).
+  that carry no distinct drift are merged with the nearest balance band of the same income
+  band and loan status. Revised 2026-10-27: a segment stays apart only if its per-account drift on
+  the training cut-offs differs from the bank-wide drift by at least `Z_MIN` = 2 standard errors
+  (pooled as non-overlapping quarters); otherwise it merges into the adjacent band with the closer
+  mean, smallest first. The size rule first proposed (standard error below half the $63 loan gap)
+  needed 1700 to 200000 accounts per segment and cut-off and could not be met. The merge map is
+  fixed on training and applied unchanged to every period; SB-a C prints it (23 segments).
 - **Rationale:** account-level changes are close to independent month to month and no table
   signals them (SB-1, SB-2 B.2, SB-4); averaging within segments keeps the group-level signals
   (income, loans, economy) and cancels individual noise (an account's 3-month change varies by
