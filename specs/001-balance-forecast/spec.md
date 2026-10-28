@@ -18,6 +18,12 @@
 - Q: How should Dormant and Closed accounts be treated, given that their status is known only as of today and not at each cut-off date? → A: Keep all accounts; report error by current status; never filter on it.
 - Q: By how much must the forecast cut the baseline's mean absolute error before the hypothesis counts as confirmed? → A: At least 10% lower MAE confirms; a 0–10% gain is partial; no gain rejects.
 
+### Session 2026-10-28
+
+- Q: Does the target behave as a time series that the plan must account for? → A: Checked on the training cut-offs (SB-b A.4). No significant calendar pattern (30 training months; month p 0.17, quarter Holm-adjusted p 0.10), so no calendar feature. No segment-specific persistence at 3 months (rho 0.007, 95% interval -0.12 to 0.13). Bank-wide drift eased from $739 to $659 per account a quarter between the 2022 and 2024 cut-offs, not significant (p 0.11).
+- Q: Does the recent-change feature measure what it claims? → A: No. Measured on the accounts in the segment at the cut-off, it carries band migration (accounts that have just fallen into a band, then recover). It is replaced by `last_quarter_change_per_account`: the change per account from `cutoff − LOOKBACK` to the cut-off of the accounts in the segment at `cutoff − LOOKBACK`; a segment with no accounts then takes the bank-wide value at the same cut-off.
+- Q: Does the falling drift or the season of the validation targets weaken the average-drift reference? → A: Reported as diagnostics only in SB-b B.3: drift fitted on the last 12 training cut-offs and on the same calendar months as validation. The reference stays the drift of all training cut-offs ($686); the variants move the validation gain over persistence from 42.6% to at most 44.9%.
+
 ### Session 2026-10-27
 
 - Q: Is "total stays the same" the only reference for the forecast? → A: It stays the reference for SC-001, because it is the bank's current assumption. A second, naive reference is reported next to it: every account grows by the bank-wide average 3-month change learned on training cut-offs ("average drift"). Balances grow on average, so persistence is biased low by construction; beating it can mean only that the model learned average growth. H1 counts as showing segment value only if it also beats average drift.

@@ -34,7 +34,8 @@ Identical in every SB notebook's constants cell; any change is made in all of th
 | `segment_id` | first column; key, excluded from `features_list` |
 | `cutoff_date` | second column, ISO `YYYY-MM-DD`; key, excluded from `features_list` |
 | `total_at_cutoff` | always present (baseline forecast) |
-| feature columns | as selected in Preparation A.z; numeric after section E transformations |
+| feature columns | as selected in Preparation A.4; numeric after section E transformations |
+| `last_quarter_change_per_account` | change per account from `cutoff_date − LOOKBACK` to `cutoff_date` of the accounts in the segment at `cutoff_date − LOOKBACK`; the bank-wide value at the same cut-off when the segment had no accounts then (research R14) |
 
 Forbidden in X: any target or future column, `account_id`, `customer_id`, `account_status`,
 `current_balance`, `age`, `gender`, `vulnerable_customer_flag`, `country_of_birth`,

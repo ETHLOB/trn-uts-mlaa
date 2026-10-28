@@ -96,7 +96,8 @@ Facts measured before planning (2026-10-23, `data/raw/`):
   EDA; the expected candidates are a regularised linear model on the change (explainable
   default) and a gradient-boosted tree model with an absolute-error loss (only if a
   hypothesis implies non-linear or interaction effects). Comparison uses expanding-window
-  folds by cut-off date inside the training period (same folds for every arm), MAE per fold,
+  folds by cut-off date inside the training period (same folds for every arm, `HORIZON − 1`
+  cut-offs embargoed between each fold's training and validation cut-offs), MAE per fold,
   and the Bayesian correlated t-test with a ROPE of 1% of the baseline MAE. Hyperparameter
   grids are small and each parameter has a business reading. Searches are cached with joblib
   next to the data.
@@ -142,7 +143,7 @@ Facts measured before planning (2026-10-23, `data/raw/`):
   the mean per-account 3-month change of the training examples (fitted on training only).
 - **Rationale:** balances grow on average (about $700 per account per quarter, SB-2 B.2), so
   persistence errs low by construction and any model that learns the average growth beats it.
-  Average drift isolates that effect: H1's claim that segment keys and recent change forecast
+  Average drift isolates that effect: H1's claim that segment keys and the last-quarter change forecast
   better is supported only if H1 also beats average drift. If it does not, the cheaper and more
   explainable drift rule is the recommendation.
 - **Alternatives:** persistence only (rejected: a "confirmed" result could reflect growth alone);
@@ -173,6 +174,30 @@ Facts measured before planning (2026-10-23, `data/raw/`):
   about $8550; the bank-wide monthly mean moves within $181 to $293, SB-3).
 - **Alternatives:** one bank-wide series (rejected: 47 monthly points are too few to learn and
   test on); account-level forecast (rejected at the gate: no signal).
+
+## R14. Time-series properties of the target (decided 2026-10-28)
+
+- **Decision:** the forecast is a direct 3-month regression on a panel of 23 segment series,
+  not a per-segment time-series model. `SB-b` A.4 checks three properties on the training
+  cut-offs, each with an effective sample size because consecutive 3-month targets overlap
+  (cut-offs / `HORIZON`, as in R12): calendar (Kruskal-Wallis on the bank-wide change per
+  account of each single training month, by month and by quarter, Holm over the two);
+  persistence (Spearman at lags `HORIZON` and `2 × HORIZON`, bank-wide and on each segment's
+  deviation with segment and cut-off means removed, intervals by resampling segments); and
+  stability (Spearman trend over the cut-offs, bank-wide and per segment, Holm across segments).
+  No calendar feature is added. The recent-change feature is redefined on a fixed group
+  (`last_quarter_change_per_account`, accounts in the segment `LOOKBACK` month-ends earlier),
+  because the group at the cut-off carries band migration. `SB-b` B.3 reports two drift
+  variants (last 12 training cut-offs; same calendar months as validation) as diagnostics.
+- **Rationale:** 28 training cut-offs per segment are too few for ARIMA or exponential smoothing
+  per segment; the signal is between segments (income, loan, balance band, size) and in the
+  economy, which one pooled regression shares. The checks found no dynamic signal to model: no
+  significant season, no segment-specific persistence, and a bank-wide easing that the
+  overlapping cut-offs cannot confirm.
+- **Alternatives:** a calendar-month feature (rejected: 12 effects from 2.5 years would overfit,
+  and the pattern is not significant); dropping the recent-change feature (rejected: on a fixed
+  group it is a time-varying estimate of the segment's drift that H1 can test); a seasonal or
+  recent-window drift as the reference (rejected: post-hoc choice; kept as a diagnostic).
 
 ## R11. Verification
 

@@ -71,6 +71,8 @@ Validation rules:
 - No feature is computed from a row dated after `cutoff_date`; a loan counts only if it started
   on or before `cutoff_date`.
 - An account belongs to one segment per cut-off and was open for the whole look-back window.
+- `last_quarter_change_per_account` is measured on the accounts in the segment `LOOKBACK`
+  month-ends before the cut-off (a fixed group), never on the group at the cut-off (research R14).
 - No filter on `account_status`.
 
 ## Derived entity: Prediction record (in memory, for evaluation)
