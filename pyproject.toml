@@ -26,3 +26,6 @@ package = false
 dev = [
     "ruff>=0.17.2",
 ]
+
+[tool.ruff]
+line-length = 100
